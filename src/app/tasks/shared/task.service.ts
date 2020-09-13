@@ -1,62 +1,36 @@
+import { environment } from './../../../environments/environment.prod';
 import { Injectable } from '@angular/core';
 import { Task } from './task';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
 
-  tasks: Task[] = [
-    {id: 1, description: 'Tarefa1', completed: false},
-    {id: 2, description: 'Tarefa2', completed: false},
-    {id: 3, description: 'Tarefa3', completed: true},
-    {id: 4, description: 'Tarefa4', completed: false},
-    {id: 5, description: 'Tarefa5', completed: false},
-    {id: 6, description: 'Tarefa6', completed: false},
-    {id: 7, description: 'Tarefa7', completed: false},
-    {id: 8, description: 'Tarefa8', completed: false},
-    {id: 9, description: 'Tarefa9', completed: false},
-    {id: 10, description: 'Tarefa10', completed: false}
-  ];
+  constructor(private http: HttpClient) { }
 
+   url = 'http://localhost:3000/tasks';
 
-  constructor() { }
-
-  getAll(): Task[]{
-    const list = window.localStorage.getItem('lista-tarefas');
-    if (list){
-      this.tasks = JSON.parse(list);
-    }
-    return this.tasks;
+  getAll(): Observable<Task[]>{
+    return this.http.get<Task[]>(`${environment.api}/tasks`);
   }
 
-  getById(id: number): Task{
-    const task = this.tasks.find((value) => value.id == id);
-    return task;
+  getById(id: string): Observable<Task>{
+    return this.http.get<Task>(`${environment.api}/tasks/${id}`);
   }
 
-  save(task: Task): void{
-    if (task.id){
-      const taskArr = this.getById(task.id);
-      taskArr.description = task.description;
-      taskArr.completed = task.completed;
+  save(task: Task): Observable<Task>{
+    if (task._id){
+      return this.http.put<Task>(`${environment.api}/tasks/${task._id}`, task);
     }else{
-      let lastId = 0;
-      if (this.tasks.length > 0){
-        lastId = this.tasks[this.tasks.length - 1].id;
-      }
-
-      task.id = lastId + 1;
-      task.completed = false;
-      this.tasks.push(task);
+      return this.http.post<Task>(`${environment.api}/tasks`, task);
     }
-    window.localStorage.setItem('lista-tarefas', JSON.stringify(this.tasks));
   }
 
-  delete(id: number): void{
-    const taskIndex = this.tasks.findIndex((value) => value.id == id);
-    this.tasks.splice(taskIndex, 1);
-    window.localStorage.setItem('lista-tarefas', JSON.stringify(this.tasks));
+  delete(id: string): Observable<Task>{
+    return this.http.delete<Task>(`${environment.api}/tasks/${id}`);
   }
 
 }

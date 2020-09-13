@@ -21,19 +21,24 @@ export class TaskFormComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.activatedRouter.snapshot.paramMap.get('id');
-    if(id){
-      this.task = this.taskService.getById(parseInt(id));
+    if (id){
+      this.taskService.getById(id).subscribe(data => {
+        this.task = data;
+      });
       this.title = 'Atualizando tarefa';
     }
   }
 
   onSubmit(): void{
-    this.taskService.save(this.task);
-    if ( this.title === 'Atualizando tarefa'){
-      alert('Tarefa alterada com sucesso!');
-    }else{
-      alert('Tarefa incluída com sucesso!');
-    }
+    this.taskService.save(this.task).subscribe(
+      data => {
+        if ( this.title === 'Atualizando tarefa'){
+          alert('Tarefa alterada com sucesso!');
+        }else{
+          alert('Tarefa incluída com sucesso!');
+        }
+      }
+    );
     this.router.navigate(['']);
   }
 
